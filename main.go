@@ -33,7 +33,10 @@ func main() {
 	}
 
 	// Create server instance
-	server := app.NewEventBotServer(c)
+	server, err := app.NewEventBotServer(c)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	// Launch server
 	server.Start()
