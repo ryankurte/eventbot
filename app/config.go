@@ -1,11 +1,5 @@
 package app
 
-import (
-	"crypto/rand"
-	"encoding/base64"
-	"errors"
-)
-
 // AuthPlz configuration structure
 type EventBotConfig struct {
 	Address       string `short:"a" long:"address" description:"Set server address"`

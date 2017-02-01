@@ -1,15 +1,18 @@
 package main
 
-import "log"
+import (
+	"log"
+)
 
 import (
 	"github.com/jessevdk/go-flags"
 	"github.com/kelseyhightower/envconfig"
-
 	"github.com/ryankurte/eventbot/app"
 )
 
 func main() {
+
+	log.Println("Starting EventBot")
 
 	// Fetch default configuration
 	c, err := app.DefaultConfig()
@@ -30,7 +33,7 @@ func main() {
 	}
 
 	// Create server instance
-	server := app.NewServer(*c)
+	server := app.NewEventBotServer(c)
 
 	// Launch server
 	server.Start()
