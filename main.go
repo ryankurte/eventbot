@@ -12,8 +12,6 @@ import (
 
 func main() {
 
-	log.Println("Starting EventBot")
-
 	// Fetch default configuration
 	c, err := app.DefaultConfig()
 	if err != nil {
@@ -37,6 +35,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	log.Println("Starting EventBot")
 
 	// Launch server
 	server.Start()
