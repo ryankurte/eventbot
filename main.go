@@ -5,30 +5,13 @@ import (
 )
 
 import (
-	"github.com/jessevdk/go-flags"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/ryankurte/eventbot/app"
 )
 
 func main() {
 
-	// Fetch default configuration
-	c, err := app.DefaultConfig()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	// Parse config structure through environment
-	err = envconfig.Process("EBOT", c)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	// Override environment with command line args
-	_, err = flags.Parse(c)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	// Fetch configuration
+	c := app.GetConfig()
 
 	// Create server instance
 	server, err := app.NewEventBotServer(c)

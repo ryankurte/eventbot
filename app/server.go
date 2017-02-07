@@ -1,7 +1,7 @@
 package app
 
 import(
-    "log"
+//    "log"
 )
 
 type EventBotServer struct {
@@ -22,7 +22,7 @@ func NewEventBotServer(config *EventBotConfig) (*EventBotServer, error) {
     }
 
     //Create event manager
-    em := NewEventManager(nil)
+    em := NewEventManager(nil, wc)
 
     // Create twitter API client
     tc, ch, err := NewTwitterConnector(config.TwitterKey, config.TwitterSecret, config.TwitterUser)

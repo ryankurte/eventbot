@@ -1,5 +1,14 @@
 package app
 
+import (
+"log"
+)
+
+import (
+	"github.com/jessevdk/go-flags"
+	"github.com/kelseyhightower/envconfig"
+)
+
 // AuthPlz configuration structure
 type EventBotConfig struct {
 	Address       string `short:"a" long:"address" description:"Set server address"`
@@ -22,4 +31,26 @@ func DefaultConfig() (*EventBotConfig, error) {
 	c.Database = "host=localhost user=postgres dbname=postgres sslmode=disable password=postgres"
 
 	return &c, nil
+}
+
+func GetConfig() *EventBotConfig {
+		// Fetch default configuration
+	c, err := DefaultConfig()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// Parse config structure through environment
+	err = envconfig.Process("EBOT", c)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// Override environment with command line args
+	_, err = flags.Parse(c)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return c
 }

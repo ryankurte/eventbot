@@ -3,6 +3,7 @@ package app
 import (
     "time"
     "log"
+    "fmt"
 )
 
 // Storage interface for events
@@ -38,15 +39,16 @@ type Event struct {
 // Event management
 type EventManager struct {
     es *EventStore
+    wc *WatsonConnector
     clients map[string] ClientConnector
 }
 
 // Create an event manager instance
-func NewEventManager(es *EventStore) *EventManager {
+func NewEventManager(es *EventStore, wc *WatsonConnector) *EventManager {
 
     clients := make(map[string] ClientConnector)
 
-    return &EventManager{es, clients}
+    return &EventManager{es, wc, clients}
 }
 
 func (em *EventManager) BindClient(name string, c ClientConnector, ch chan Message) {
@@ -80,9 +82,10 @@ func (em *EventManager) handleMessages(c chan Message) {
 }
 
 // Handle a single message
-func (em *EventManager) handleMessage(m Message) {
+func (em *EventManager) handleMessage(m Message) error {
 
     // TODO: process incoming message
+    em.wc.HandleMessage(m.Text())
 
     // TODO: act on message
 
@@ -97,6 +100,8 @@ func (em *EventManager) handleMessage(m Message) {
 
     // Send reply
     c.Send(&reply)
+
+    return fmt.Errorf("Whoops")
 }
 
 // Create an event
