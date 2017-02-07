@@ -1,7 +1,7 @@
-package app
+package config
 
 import (
-"log"
+	"log"
 )
 
 import (
@@ -19,7 +19,7 @@ type EventBotConfig struct {
 	TwitterUser   string `short:"u" long:"twitter-user" description:"Twitter username"`
 	WatsonUser    string `short:"w" long:"watson-user" description:"Watson API username"`
 	WatsonPass    string `short:"x" long:"watson-password" description:"Watson API password"`
-	WatsonWs 	  string `short:"y" long:"watson-workspace" description:"Watson conversations workspace"`
+	WatsonWs      string `short:"y" long:"watson-workspace" description:"Watson conversations workspace"`
 }
 
 // Generate default configuration
@@ -34,7 +34,7 @@ func DefaultConfig() (*EventBotConfig, error) {
 }
 
 func GetConfig() *EventBotConfig {
-		// Fetch default configuration
+	// Fetch default configuration
 	c, err := DefaultConfig()
 	if err != nil {
 		log.Fatal(err.Error())

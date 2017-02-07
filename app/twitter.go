@@ -1,7 +1,7 @@
 /**
  * Twitter application connector
  *
-*/
+ */
 
 package app
 
@@ -11,21 +11,21 @@ import (
 )
 
 import (
+	"github.com/dghubble/go-twitter/twitter"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
-	"github.com/dghubble/go-twitter/twitter"
 )
 
 type TwitterConnector struct {
 	client *twitter.Client
 	stream *twitter.Stream
-	ch chan Message
+	ch     chan Message
 }
 
 const (
 	TwitterConnectorName string = "twitter"
-	twitterPM = "public_message"
-	twitterDM = "direct_message"
+	twitterPM                   = "public_message"
+	twitterDM                   = "direct_message"
 )
 
 func NewTwitterConnector(apiKey string, apiSecret string, username string) (*TwitterConnector, chan Message, error) {
@@ -58,7 +58,7 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 	stream, stream_err := client.Streams.User(streamParams)
 	if stream_err != nil {
 		log.Printf("Twitter error: %s\n", stream_err)
-		return nil, nil, stream_err;
+		return nil, nil, stream_err
 	}
 
 	ch := make(chan Message, 100)
@@ -86,7 +86,7 @@ func (tc *TwitterConnector) Send(message *Message) error {
 	// TODO: handle DMs
 
 	// Format message
-	data := fmt.Sprintf("@%s %s", message.User(), message.Text());
+	data := fmt.Sprintf("@%s %s", message.User(), message.Text())
 
 	// Check message length
 	if len(data) > 140 {
@@ -96,10 +96,9 @@ func (tc *TwitterConnector) Send(message *Message) error {
 	// Post status update
 	_, _, err := tc.client.Statuses.Update(data, nil)
 
-	return err;
-} 
+	return err
+}
 
 func (tc *TwitterConnector) Close() {
 	tc.stream.Stop()
 }
-

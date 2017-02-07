@@ -6,12 +6,13 @@ import (
 
 import (
 	"github.com/ryankurte/eventbot/app"
+	"github.com/ryankurte/eventbot/config"
 )
 
 func main() {
 
 	// Fetch configuration
-	c := app.GetConfig()
+	c := config.GetConfig()
 
 	// Create server instance
 	server, err := app.NewEventBotServer(c)
