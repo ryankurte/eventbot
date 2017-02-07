@@ -48,6 +48,7 @@ func (wc* WatsonConnector) HandleMessage(message string) {
         return
     }
 
-    // TODO: handle intents and create event
+    // TODO: return message information
 
 }
+

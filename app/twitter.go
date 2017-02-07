@@ -19,9 +19,16 @@ import (
 type TwitterConnector struct {
 	client *twitter.Client
 	stream *twitter.Stream
+	ch chan Message
 }
 
-func NewTwitterConnector(apiKey string, apiSecret string, username string) (*TwitterConnector, error) {
+const (
+	TwitterConnectorName string = "twitter"
+	twitterPM = "public_message"
+	twitterDM = "direct_message"
+)
+
+func NewTwitterConnector(apiKey string, apiSecret string, username string) (*TwitterConnector, chan Message, error) {
 
 	// Build 2 legged oauth config
 	config := &clientcredentials.Config{
@@ -40,7 +47,7 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 	user, _, user_err := client.Users.Show(userShowParams)
 	if user_err != nil {
 		log.Printf("Twitter error: %s\n", user_err)
-		return nil, user_err
+		return nil, nil, user_err
 	}
 	fmt.Printf("Got profile for: %s\n", user.ScreenName)
 
@@ -51,30 +58,35 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 	stream, stream_err := client.Streams.User(streamParams)
 	if stream_err != nil {
 		log.Printf("Twitter error: %s\n", stream_err)
-		return nil, stream_err;
+		return nil, nil, stream_err;
 	}
+
+	ch := make(chan Message, 100)
 
 	// Create demux
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
-		fmt.Println(tweet.Text)
+		ch <- Message{tweet.Text, tweet.User.Name, TwitterConnectorName, twitterPM}
 	}
 	demux.DM = func(dm *twitter.DirectMessage) {
-		fmt.Println(dm.SenderID)
+		ch <- Message{dm.Text, dm.Sender.Name, TwitterConnectorName, twitterDM}
 	}
 	demux.Event = func(event *twitter.Event) {
-		fmt.Printf("%#v\n", event)
+		fmt.Printf("Event: %#v\n", event)
 	}
 
 	// Bind to stream
 	go demux.HandleChan(stream.Messages)
 
-	return &TwitterConnector{client, stream}, nil
+	return &TwitterConnector{client, stream, ch}, ch, nil
 }
 
-func (tc *TwitterConnector) Send(user string, message string) error {
+// Send a message using a given connector
+func (tc *TwitterConnector) Send(message *Message) error {
+	// TODO: handle DMs
+
 	// Format message
-	data := fmt.Sprintf("@%s @%s", user, message);
+	data := fmt.Sprintf("@%s %s", message.User(), message.Text());
 
 	// Check message length
 	if len(data) > 140 {

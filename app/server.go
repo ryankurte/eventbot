@@ -3,30 +3,37 @@ package app
 type EventBotServer struct {
     tc *TwitterConnector
     wc *WatsonConnector
+    em *EventManager
 }
 
 func NewEventBotServer(config *EventBotConfig) (*EventBotServer, error) {
     var err error
 
-    // Create twitter and Watson API connectors
-    tc, err := NewTwitterConnector(config.TwitterKey, config.TwitterSecret, config.TwitterUser)
-    if err != nil {
-        return nil, err
-    }
+    //TODO: create database connector
+
+    // Create watson connector
     wc, err := NewWatsonConnector(config.WatsonUser, config.WatsonPass, config.WatsonWs)
     if err != nil {
         return nil, err
     }
 
-    //TODO: create database connector
+    //Create event manager
+    em := NewEventManager(nil)
 
-    //TODO: create event manager
+    // Create twitter API client
+    tc, ch, err := NewTwitterConnector(config.TwitterKey, config.TwitterSecret, config.TwitterUser)
+    if err != nil {
+        return nil, err
+    }
 
-    //TODO: wire everything together
+    // Bind to Event manager
+    em.BindClient(TwitterConnectorName, tc, ch)
 
-	return &EventBotServer{tc, wc}, nil
+	return &EventBotServer{tc, wc, em}, nil
 }
 
 func (ebs *EventBotServer) Start() {
+    // TODO: start, maybe?
+    // Could have a shitty web view here also
 
 }
