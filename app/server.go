@@ -1,5 +1,9 @@
 package app
 
+import(
+    "log"
+)
+
 type EventBotServer struct {
     tc *TwitterConnector
     wc *WatsonConnector

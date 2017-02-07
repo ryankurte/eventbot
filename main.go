@@ -19,7 +19,7 @@ func main() {
 	}
 
 	// Parse config structure through environment
-	err = envconfig.Process("ebot", c)
+	err = envconfig.Process("EBOT", c)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
