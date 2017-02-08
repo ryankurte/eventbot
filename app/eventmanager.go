@@ -7,7 +7,7 @@ import (
 )
 
 import (
-	// TODO: switch to interface to remove this dependency
+	// TODO: should probably switch to interfaces to remove these dependencies
 	"github.com/ryankurte/eventbot/analysis"
 )
 
@@ -25,7 +25,7 @@ type UserStore interface {
 
 // Interface for client connectors
 type ClientConnector interface {
-	Send(m *Message) error
+	Send(m interface{}) error
 }
 
 // Event instance for storage
@@ -54,7 +54,7 @@ func NewEventManager(es *EventStore, wc *analysis.WatsonConnector) *EventManager
 	return &EventManager{es, wc, clients}
 }
 
-func (em *EventManager) BindClient(name string, c ClientConnector, ch chan Message) {
+func (em *EventManager) BindClient(name string, c ClientConnector, ch chan interface{}) {
 	// Save client instance
 	em.clients[name] = c
 
@@ -69,7 +69,7 @@ func (em *EventManager) Close() {
 }
 
 // Handle messages from a provided channel
-func (em *EventManager) handleMessages(c chan Message) {
+func (em *EventManager) handleMessages(c chan interface{}) {
 	for {
 		// Load events
 		m, open := <-c
@@ -85,26 +85,36 @@ func (em *EventManager) handleMessages(c chan Message) {
 }
 
 // Handle a single message
-func (em *EventManager) handleMessage(m Message) error {
+func (em *EventManager) handleMessage(i interface{}) error {
+
+    m, ok := i.(Message)
+    if !ok {
+        return fmt.Errorf("EventManager message must implement Message interface")
+    }
 
 	// TODO: process incoming message
-	em.wc.HandleMessage(m.Text())
+	res, err := em.wc.HandleMessage(m.Text())
+	if err != nil {
+		return fmt.Errorf("Error processing message")
+	}
 
 	// TODO: act on message
 
-	// Generate reply
-	reply := m.Reply("Test reply")
+	if res.Response != "" {
+		// Generate reply
+        reply := m.Reply(res.Response)
 
-	// Locate matching client
-	c, ok := em.clients[m.Connector()]
-	if !ok {
-		log.Printf("Invalid connector %s for response", m.Connector())
+		// Locate matching client
+		c, ok := em.clients[m.Connector()]
+		if !ok {
+			return fmt.Errorf("Invalid connector %s for response", m.Connector())
+		}
+
+		// Send reply
+		c.Send(reply)
 	}
 
-	// Send reply
-	c.Send(&reply)
-
-	return fmt.Errorf("Whoops")
+	return nil
 }
 
 // Create an event

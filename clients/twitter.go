@@ -3,7 +3,7 @@
  *
  */
 
-package app
+package clients
 
 import (
 	"fmt"
@@ -19,7 +19,35 @@ import (
 type TwitterConnector struct {
 	client *twitter.Client
 	stream *twitter.Stream
-	ch     chan Message
+	ch     chan interface{}
+}
+
+// Twitter client message object
+type TwitterMessage struct {
+	text      string // Message text
+	user      string // User name (ie. jpdanner)
+	connector string // Connector name (ie. twitter)
+	args      string // Arguments for connector (ie. DM)
+}
+
+// Generate a reply message preserving required fields
+func (m *TwitterMessage) Reply(text string) TwitterMessage {
+	return TwitterMessage{text, m.user, m.connector, m.args}
+}
+
+func (m *TwitterMessage) Text() string {
+	return m.text
+}
+
+func (m *TwitterMessage) User() string {
+	return m.user
+}
+
+func (m *TwitterMessage) Connector() string {
+	return m.connector
+}
+func (m *TwitterMessage) Args() string {
+	return m.args
 }
 
 const (
@@ -28,7 +56,7 @@ const (
 	twitterDM                   = "direct_message"
 )
 
-func NewTwitterConnector(apiKey string, apiSecret string, username string) (*TwitterConnector, chan Message, error) {
+func NewTwitterConnector(apiKey string, apiSecret string, username string) (*TwitterConnector, chan interface{}, error) {
 
 	// Build 2 legged oauth config
 	config := &clientcredentials.Config{
@@ -61,15 +89,15 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 		return nil, nil, stream_err
 	}
 
-	ch := make(chan Message, 100)
+	ch := make(chan interface{}, 100)
 
 	// Create demux
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
-		ch <- Message{tweet.Text, tweet.User.Name, TwitterConnectorName, twitterPM}
+		ch <- TwitterMessage{tweet.Text, tweet.User.Name, TwitterConnectorName, twitterPM}
 	}
 	demux.DM = func(dm *twitter.DirectMessage) {
-		ch <- Message{dm.Text, dm.Sender.Name, TwitterConnectorName, twitterDM}
+		ch <- TwitterMessage{dm.Text, dm.Sender.Name, TwitterConnectorName, twitterDM}
 	}
 	demux.Event = func(event *twitter.Event) {
 		fmt.Printf("Event: %#v\n", event)
@@ -82,11 +110,16 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 }
 
 // Send a message using a given connector
-func (tc *TwitterConnector) Send(message *Message) error {
+func (tc *TwitterConnector) Send(message interface{}) error {
+	m, ok := message.(TwitterMessage)
+	if !ok {
+		return fmt.Errorf("Invalid message type (not twitter message)")
+	}
+
 	// TODO: handle DMs
 
 	// Format message
-	data := fmt.Sprintf("@%s %s", message.User(), message.Text())
+	data := fmt.Sprintf("@%s %s", m.User(), m.Text())
 
 	// Check message length
 	if len(data) > 140 {

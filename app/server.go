@@ -2,11 +2,12 @@ package app
 
 import (
 	"github.com/ryankurte/eventbot/analysis"
+	"github.com/ryankurte/eventbot/clients"
 	"github.com/ryankurte/eventbot/config"
 )
 
 type EventBotServer struct {
-	tc *TwitterConnector
+	tc *clients.TwitterConnector
 	wc *analysis.WatsonConnector
 	em *EventManager
 }
@@ -26,13 +27,13 @@ func NewEventBotServer(config *config.EventBotConfig) (*EventBotServer, error) {
 	em := NewEventManager(nil, wc)
 
 	// Create twitter API client
-	tc, ch, err := NewTwitterConnector(config.TwitterKey, config.TwitterSecret, config.TwitterUser)
+	tc, ch, err := clients.NewTwitterConnector(config.TwitterKey, config.TwitterSecret, config.TwitterUser)
 	if err != nil {
 		return nil, err
 	}
 
 	// Bind to Event manager
-	em.BindClient(TwitterConnectorName, tc, ch)
+	em.BindClient(clients.TwitterConnectorName, tc, ch)
 
 	return &EventBotServer{tc, wc, em}, nil
 }

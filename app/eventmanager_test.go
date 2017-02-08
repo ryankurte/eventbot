@@ -10,11 +10,36 @@ import (
 	"github.com/ryankurte/eventbot/config"
 )
 
+// Twitter client message object
+type FakeMessage struct {
+	text      string // Message text
+	user      string // User name (ie. jpdanner)
+	connector string // Connector name (ie. twitter)
+}
+
+// Generate a reply message preserving required fields
+func (m *FakeMessage) Reply(text string) interface{} {
+	return &FakeMessage{text, m.user, m.connector}
+}
+
+func (m *FakeMessage) Text() string {
+	return m.text
+}
+
+func (m *FakeMessage) User() string {
+	return m.user
+}
+
+func (m *FakeMessage) Connector() string {
+	return m.connector
+}
+
 type FakeClient struct {
 }
 
-func (fc *FakeClient) Send(m *Message) error {
-	log.Printf("Send: %+v\n", m)
+func (fc *FakeClient) Send(m interface{}) error {
+    message := m.(*FakeMessage)
+	log.Printf("Send: %+v\n", message)
 	return nil
 }
 
@@ -30,7 +55,7 @@ func TestEventManager(t *testing.T) {
 	}
 
 	fc := FakeClient{}
-	ch := make(chan Message, 100)
+	ch := make(chan interface{}, 100)
 
 	//Create event manager
 	em := NewEventManager(nil, wc)
@@ -40,15 +65,14 @@ func TestEventManager(t *testing.T) {
 
 	// Run tests
 	t.Run("Create an event", func(t *testing.T) {
-		m := Message{
+		m := FakeMessage{
 			"Drinks tonight at Vultures Lane?",
 			"testuser",
 			"testclient",
-			"",
 		}
 
 		// Handle message
-		err := em.handleMessage(m)
+		err := em.handleMessage(&m)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
