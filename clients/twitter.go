@@ -29,11 +29,12 @@ type TwitterMessage struct {
 	connector string // Connector name (ie. twitter)
 	args      string // Arguments for connector (ie. DM)
 	userid    int64
+	tweetid   int64
 }
 
 // Generate a reply message preserving required fields
 func (m *TwitterMessage) Reply(text string) interface{} {
-	return &TwitterMessage{text, m.user, m.connector, m.args, m.userid}
+	return &TwitterMessage{text, m.user, m.connector, m.args, m.userid, m.tweetid}
 }
 
 func (m *TwitterMessage) Text() string {
@@ -86,13 +87,13 @@ func NewTwitterConnector(apiKey string, apiSecret string, accessToken string, to
 	demux.Tweet = func(tweet *twitter.Tweet) {
 		if tweet.User.ScreenName != username {
 			log.Printf("Twitter received message: %s from user %s", tweet.Text, tweet.User.ScreenName)
-			ch <- &TwitterMessage{tweet.Text, tweet.User.ScreenName, TwitterConnectorName, twitterPM, tweet.User.ID}
+			ch <- &TwitterMessage{tweet.Text, tweet.User.ScreenName, TwitterConnectorName, twitterPM, tweet.User.ID, tweet.ID}
 		}
 	}
 	demux.DM = func(dm *twitter.DirectMessage) {
 		if dm.Sender.ScreenName != username {
 			log.Printf("Twitter received dm: %s from user %s", dm.Text, dm.Sender.ScreenName)
-			ch <- &TwitterMessage{dm.Text, dm.Sender.ScreenName, TwitterConnectorName, twitterDM, dm.Sender.ID}
+			ch <- &TwitterMessage{dm.Text, dm.Sender.ScreenName, TwitterConnectorName, twitterDM, dm.Sender.ID, dm.ID}
 		}
 	}
 	demux.Event = func(event *twitter.Event) {
@@ -129,6 +130,11 @@ func (tc *TwitterConnector) Send(message interface{}) error {
 		_, _, err = tc.client.DirectMessages.New(&dm)
 
 	case twitterPM:
+		// Generate reply metadata
+		tweet := twitter.StatusUpdateParams{
+			InReplyToStatusID: m.tweetid,
+		}
+
 		// Format message
 		data := fmt.Sprintf("@%s %s", m.User(), m.Text())
 
@@ -138,7 +144,7 @@ func (tc *TwitterConnector) Send(message interface{}) error {
 		}
 
 		// Post status update
-		_, _, err = tc.client.Statuses.Update(data, nil)
+		_, _, err = tc.client.Statuses.Update(data, &tweet)
 	}
 
 	return err

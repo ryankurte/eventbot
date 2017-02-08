@@ -101,7 +101,7 @@ func (em *EventManager) handleMessages(c chan interface{}) {
 
 // Handle a single message
 func (em *EventManager) handleMessage(i interface{}) error {
-    var err error = nil
+	var err error = nil
 
 	m := i.(Message)
 
@@ -115,6 +115,22 @@ func (em *EventManager) handleMessage(i interface{}) error {
 	}
 
 	// TODO: act on message
+	switch res.Intent {
+	case analysis.IntentCreateEvent:
+
+	case analysis.IntentCancelEvent:
+
+	case analysis.IntentUpdateEvent:
+
+	case analysis.IntentFindEvents:
+
+	case analysis.IntentAttending:
+
+	case analysis.IntentNotAttending:
+
+	case analysis.IntentRemindMe:
+
+	}
 
 	if res.Response != "" {
 		log.Printf("Sending reply")
@@ -133,7 +149,7 @@ func (em *EventManager) handleMessage(i interface{}) error {
 		c.Send(reply)
 	}
 
-    return err
+	return err
 }
 
 // Create an event
