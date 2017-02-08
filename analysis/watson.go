@@ -64,7 +64,12 @@ func (wc *WatsonConnector) HandleMessage(message string) (*WatsonResponse, error
 
 	// Create response object
 	resp := WatsonResponse{
-		Intent: reply.Intents[0].Intent,
+		Intent: IntentUnrecognized,
+	}
+
+	// Update intent if exists
+	if len(reply.Intents) > 0 {
+		resp.Intent = reply.Intents[0].Intent
 	}
 
 	// Save response text if exists

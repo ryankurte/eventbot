@@ -1,6 +1,5 @@
 package app
 
-
 import (
 	"github.com/ryankurte/eventbot/analysis"
 	"github.com/ryankurte/eventbot/clients"
@@ -28,7 +27,8 @@ func NewEventBotServer(config *config.EventBotConfig) (*EventBotServer, error) {
 	em := NewEventManager(nil, wc)
 
 	// Create twitter API client
-	tc, ch, err := clients.NewTwitterConnector(config.TwitterKey, config.TwitterSecret, config.TwitterUser)
+	tc, ch, err := clients.NewTwitterConnector(config.TwitterApiKey, config.TwitterApiSecret,
+		config.TwitterAccessToken, config.TwitterTokenSecret, config.TwitterUser)
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +46,5 @@ func (ebs *EventBotServer) Start() {
 }
 
 func (ebs *EventBotServer) Close() {
-    ebs.em.Close()
+	ebs.em.Close()
 }
-

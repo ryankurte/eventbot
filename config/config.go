@@ -11,16 +11,18 @@ import (
 
 // AuthPlz configuration structure
 type EventBotConfig struct {
-	Address       string `short:"a" long:"address" description:"Set server address"`
-	Port          string `short:"p" long:"port" description:"Set server port"`
-	Database      string `short:"d" long:"database" description:"Database connection string"`
-	TwitterKey    string `short:"k" long:"twitter-key" description:"Twitter API key"`
-	TwitterSecret string `short:"s" long:"twitter-secret" description:"Twitter API secret"`
-	TwitterUser   string `short:"u" long:"twitter-user" description:"Twitter username"`
-	WatsonUser    string `short:"w" long:"watson-user" description:"Watson API username"`
-	WatsonPass    string `short:"x" long:"watson-password" description:"Watson API password"`
-	WatsonWs      string `short:"y" long:"watson-workspace" description:"Watson conversations workspace"`
-	Test      	  string `short:"t" long:"test" description:"Sets test mode for go test -v ./... support"`
+	Address            string `short:"a" long:"address" description:"Set server address" split_words:"true"`
+	Port               string `short:"p" long:"port" description:"Set server port" split_words:"true"`
+	Database           string `short:"d" long:"database" description:"Database connection string" split_words:"true"`
+	TwitterApiKey      string `long:"twitter-api-key" description:"Twitter API key" split_words:"true"`
+	TwitterApiSecret   string `long:"twitter-api-secret" description:"Twitter API secret" split_words:"true"`
+	TwitterAccessToken string `long:"twitter-token" description:"Twitter access token" split_words:"true"`
+	TwitterTokenSecret string `long:"twitter-token-secret" description:"Twitter access token secret" split_words:"true"`
+	TwitterUser        string `long:"twitter-user" description:"Twitter username" split_words:"true"`
+	WatsonUser         string `long:"watson-user" description:"Watson API username" split_words:"true"`
+	WatsonPass         string `long:"watson-password" description:"Watson API password" split_words:"true"`
+	WatsonWs           string `long:"watson-workspace" description:"Watson conversations workspace" split_words:"true"`
+	Test               string `short:"t" long:"test" description:"Sets test mode for go test -v ./... support" split_words:"true"`
 }
 
 // Generate default configuration

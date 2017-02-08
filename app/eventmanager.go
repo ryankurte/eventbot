@@ -1,10 +1,9 @@
 package app
 
 import (
-	"fmt"
 	"log"
+	"sync"
 	"time"
-    "sync"
 )
 
 import (
@@ -27,7 +26,7 @@ type UserStore interface {
 // Interface for client connectors
 type ClientConnector interface {
 	Send(m interface{}) error
-    Close()
+	Close()
 }
 
 // Event instance for storage
@@ -43,18 +42,18 @@ type Event struct {
 
 // Event management
 type EventManager struct {
-	es      *EventStore
-	wc      *analysis.WatsonConnector
-	clients map[string]ClientConnector
-    channels map[string]chan interface{}
-    wg sync.WaitGroup
+	es       *EventStore
+	wc       *analysis.WatsonConnector
+	clients  map[string]ClientConnector
+	channels map[string]chan interface{}
+	wg       sync.WaitGroup
 }
 
 // Create an event manager instance
 func NewEventManager(es *EventStore, wc *analysis.WatsonConnector) *EventManager {
 
 	clients := make(map[string]ClientConnector)
-    channels := make(map[string]chan interface{})
+	channels := make(map[string]chan interface{})
 
 	return &EventManager{es, wc, clients, channels, sync.WaitGroup{}}
 }
@@ -62,33 +61,33 @@ func NewEventManager(es *EventStore, wc *analysis.WatsonConnector) *EventManager
 func (em *EventManager) BindClient(name string, c ClientConnector, ch chan interface{}) {
 	// Save client instance
 	em.clients[name] = c
-    em.channels[name] = ch
+	em.channels[name] = ch
 
 	// Start thread to listen for client events
-    em.wg.Add(1)
+	em.wg.Add(1)
 	go em.handleMessages(ch)
 
 }
 
 func (em *EventManager) Close() {
 	// TODO: exit client routines
-    for _, c := range(em.channels) {
-        close(c)
-    }
+	for _, c := range em.channels {
+		close(c)
+	}
 
-    em.wg.Wait()
+	em.wg.Wait()
 }
 
 // Handle messages from a provided channel
 func (em *EventManager) handleMessages(c chan interface{}) {
-    log.Printf("Starting message handler routine")
+	log.Printf("Starting message handler routine")
 
 	for {
 		// Load events
 		m, open := <-c
 		if open {
 			// Call message handler
-            log.Println("Received message")
+			log.Printf("Received message generic")
 			em.handleMessage(m)
 		} else {
 			// Exit message handling go-routine
@@ -96,41 +95,42 @@ func (em *EventManager) handleMessages(c chan interface{}) {
 			break
 		}
 	}
-    log.Printf("Exiting message handler routine")
-    em.wg.Done()
+	log.Printf("Exiting message handler routine")
+	em.wg.Done()
 }
 
 // Handle a single message
-func (em *EventManager) handleMessage(i interface{}) error {
+func (em *EventManager) handleMessage(i interface{}) {
 
-    m, ok := i.(Message)
-    if !ok {
-        return fmt.Errorf("EventManager message must implement Message interface")
-    }
+	m := i.(Message)
+
+	log.Printf("Processing message")
 
 	// TODO: process incoming message
 	res, err := em.wc.HandleMessage(m.Text())
 	if err != nil {
-		return fmt.Errorf("Error processing message")
+		log.Printf("Error processing message")
+		return
 	}
 
 	// TODO: act on message
 
 	if res.Response != "" {
+		log.Printf("Sending reply")
+
 		// Generate reply
-        reply := m.Reply(res.Response)
+		reply := m.Reply(res.Response)
 
 		// Locate matching client
 		c, ok := em.clients[m.Connector()]
 		if !ok {
-			return fmt.Errorf("Invalid connector %s for response", m.Connector())
+			log.Printf("Invalid connector %s for response", m.Connector())
+			return
 		}
 
 		// Send reply
 		c.Send(reply)
 	}
-
-	return nil
 }
 
 // Create an event

@@ -38,13 +38,13 @@ type FakeClient struct {
 }
 
 func (fc *FakeClient) Send(m interface{}) error {
-    message := m.(*FakeMessage)
+	message := m.(*FakeMessage)
 	log.Printf("Send: %+v\n", message)
 	return nil
 }
 
 func (fc *FakeClient) Close() {
-    
+
 }
 
 func TestEventManager(t *testing.T) {
@@ -83,16 +83,15 @@ func TestEventManager(t *testing.T) {
 		}
 	})
 
-    t.Run("Handle message via channel", func(t *testing.T) {
-        m := FakeMessage{
-            "Drinks tonight at Vultures Lane?",
-            "testuser",
-            "testclient",
-        }
+	t.Run("Handle message via channel", func(t *testing.T) {
+		m := FakeMessage{
+			"Drinks tonight at Vultures Lane?",
+			"testuser",
+			"testclient",
+		}
 
-        // Send message via channel
-        ch <- m
+		// Send message via channel
+		ch <- m
 
-
-    })
+	})
 }
