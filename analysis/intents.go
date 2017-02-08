@@ -14,4 +14,5 @@ const (
 	IntentAttending    string = "Attending"    // Set attending an event (ie. "I'll be there")
 	IntentNotAttending string = "NotAttending" // Set not attending an event (ie. "I'm busy tonight")
 	IntentRemindMe     string = "RemindMe"     // Get event reminders (ie. "Remind me the day before")
+    IntentArrived      string = "Arrived"      // Set that you have arrived at an event
 )

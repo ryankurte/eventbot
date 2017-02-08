@@ -117,18 +117,24 @@ func (em *EventManager) handleMessage(i interface{}) error {
 	// TODO: act on message
 	switch res.Intent {
 	case analysis.IntentCreateEvent:
+        
 
 	case analysis.IntentCancelEvent:
+        // Check owner, when and where match
 
-	case analysis.IntentUpdateEvent:
+        // Delete event
 
 	case analysis.IntentFindEvents:
+        // Find events based on when / where filters
 
 	case analysis.IntentAttending:
+        // Set attending flag for a given event
 
 	case analysis.IntentNotAttending:
+        // Set not attending flag for a given event
 
-	case analysis.IntentRemindMe:
+    case analysis.IntentArrived:
+        // Set arrived flag for a given event
 
 	}
 
@@ -154,9 +160,15 @@ func (em *EventManager) handleMessage(i interface{}) error {
 
 // Create an event
 func (em *EventManager) createEvent(name string, where string, when time.Time) {
+    // Check owner is authorized to create events
+
+    // Check when and where exist
+
 	// Create event instance
 
 	// Broadcast and attach ID to event instance
 
 	// Save to database
 }
+
+
