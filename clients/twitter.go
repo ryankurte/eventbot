@@ -71,13 +71,14 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 	client := twitter.NewClient(httpClient)
 
 	// Fetch a user object
+	/*
 	userShowParams := &twitter.UserShowParams{ScreenName: username}
 	user, _, user_err := client.Users.Show(userShowParams)
 	if user_err != nil {
 		log.Printf("Twitter error: %s\n", user_err)
 		return nil, nil, user_err
 	}
-	fmt.Printf("Twitter fetched profile for: %s\n", user.ScreenName)
+	*/
 
 	// Create stream connection
 	streamParams := &twitter.StreamUserParams{
@@ -105,6 +106,10 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 		log.Printf("Twitter received event: %#v", event)
 	}
 
+	demux.Other = func(message interface{}) {
+		log.Printf("Twitter received unhandled event type: %#v", message)
+	}
+
 	// Bind to stream
 	go demux.HandleChan(stream.Messages)
 
@@ -115,7 +120,7 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 func (tc *TwitterConnector) Send(message interface{}) error {
 	m, ok := message.(TwitterMessage)
 	if !ok {
-		return fmt.Errorf("Invalid message type (not twitter message)")
+		return fmt.Errorf("Invalid message type (not TwitterMessage)")
 	}
 
 	// TODO: handle DMs

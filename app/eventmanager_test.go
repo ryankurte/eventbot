@@ -43,6 +43,10 @@ func (fc *FakeClient) Send(m interface{}) error {
 	return nil
 }
 
+func (fc *FakeClient) Close() {
+    
+}
+
 func TestEventManager(t *testing.T) {
 	// Fetch configuration
 	c := config.GetConfig()
@@ -89,6 +93,6 @@ func TestEventManager(t *testing.T) {
         // Send message via channel
         ch <- m
 
-        
+
     })
 }

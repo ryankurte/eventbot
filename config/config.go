@@ -20,6 +20,7 @@ type EventBotConfig struct {
 	WatsonUser    string `short:"w" long:"watson-user" description:"Watson API username"`
 	WatsonPass    string `short:"x" long:"watson-password" description:"Watson API password"`
 	WatsonWs      string `short:"y" long:"watson-workspace" description:"Watson conversations workspace"`
+	Test      	  string `short:"t" long:"test" description:"Sets test mode for go test -v ./... support"`
 }
 
 // Generate default configuration

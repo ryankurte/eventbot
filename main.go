@@ -32,7 +32,7 @@ func main() {
 	ch := make(chan os.Signal)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
 	log.Println(<-ch)
-	log.Println("Exiting eventbot")
+	log.Println("Exiting EventBot")
 
 	// Close server
 	server.Close()
