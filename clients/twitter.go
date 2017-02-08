@@ -77,7 +77,7 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 		log.Printf("Twitter error: %s\n", user_err)
 		return nil, nil, user_err
 	}
-	fmt.Printf("Got profile for: %s\n", user.ScreenName)
+	fmt.Printf("Twitter fetched profile for: %s\n", user.ScreenName)
 
 	// Create stream connection
 	streamParams := &twitter.StreamUserParams{
@@ -85,7 +85,7 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 	}
 	stream, stream_err := client.Streams.User(streamParams)
 	if stream_err != nil {
-		log.Printf("Twitter error: %s\n", stream_err)
+		log.Printf("Twitter stream error: %s\n", stream_err)
 		return nil, nil, stream_err
 	}
 
@@ -94,13 +94,15 @@ func NewTwitterConnector(apiKey string, apiSecret string, username string) (*Twi
 	// Create demux
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
+		log.Printf("Twitter received message: %s from user %s", tweet.Text, tweet.User.Name)
 		ch <- TwitterMessage{tweet.Text, tweet.User.Name, TwitterConnectorName, twitterPM}
 	}
 	demux.DM = func(dm *twitter.DirectMessage) {
+		log.Printf("Twitter received dm: %s from user %s", dm.Text, dm.Sender.Name)
 		ch <- TwitterMessage{dm.Text, dm.Sender.Name, TwitterConnectorName, twitterDM}
 	}
 	demux.Event = func(event *twitter.Event) {
-		fmt.Printf("Event: %#v\n", event)
+		log.Printf("Twitter received event: %#v", event)
 	}
 
 	// Bind to stream

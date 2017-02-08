@@ -64,7 +64,7 @@ func TestEventManager(t *testing.T) {
 	em.BindClient("testclient", &fc, ch)
 
 	// Run tests
-	t.Run("Create an event", func(t *testing.T) {
+	t.Run("Handle message directly", func(t *testing.T) {
 		m := FakeMessage{
 			"Drinks tonight at Vultures Lane?",
 			"testuser",
@@ -78,4 +78,17 @@ func TestEventManager(t *testing.T) {
 			t.FailNow()
 		}
 	})
+
+    t.Run("Handle message via channel", func(t *testing.T) {
+        m := FakeMessage{
+            "Drinks tonight at Vultures Lane?",
+            "testuser",
+            "testclient",
+        }
+
+        // Send message via channel
+        ch <- m
+
+        
+    })
 }

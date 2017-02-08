@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+    "sync"
 )
 
 import (
@@ -26,6 +27,7 @@ type UserStore interface {
 // Interface for client connectors
 type ClientConnector interface {
 	Send(m interface{}) error
+    Close()
 }
 
 // Event instance for storage
@@ -44,37 +46,49 @@ type EventManager struct {
 	es      *EventStore
 	wc      *analysis.WatsonConnector
 	clients map[string]ClientConnector
+    channels map[string]chan interface{}
+    wg sync.WaitGroup
 }
 
 // Create an event manager instance
 func NewEventManager(es *EventStore, wc *analysis.WatsonConnector) *EventManager {
 
 	clients := make(map[string]ClientConnector)
+    channels := make(map[string]chan interface{})
 
-	return &EventManager{es, wc, clients}
+	return &EventManager{es, wc, clients, channels, sync.WaitGroup{}}
 }
 
 func (em *EventManager) BindClient(name string, c ClientConnector, ch chan interface{}) {
 	// Save client instance
 	em.clients[name] = c
+    em.channels[name] = ch
 
 	// Start thread to listen for client events
+    em.wg.Add(1)
 	go em.handleMessages(ch)
 
 }
 
 func (em *EventManager) Close() {
 	// TODO: exit client routines
+    for _, c := range(em.channels) {
+        close(c)
+    }
 
+    em.wg.Wait()
 }
 
 // Handle messages from a provided channel
 func (em *EventManager) handleMessages(c chan interface{}) {
+    log.Printf("Starting message handler routine")
+
 	for {
 		// Load events
 		m, open := <-c
 		if open {
 			// Call message handler
+            log.Println("Received message")
 			em.handleMessage(m)
 		} else {
 			// Exit message handling go-routine
@@ -82,6 +96,8 @@ func (em *EventManager) handleMessages(c chan interface{}) {
 			break
 		}
 	}
+    log.Printf("Exiting message handler routine")
+    em.wg.Done()
 }
 
 // Handle a single message

@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 import (
@@ -24,4 +27,13 @@ func main() {
 
 	// Launch server
 	server.Start()
+
+	// Hax to keep running
+	ch := make(chan os.Signal)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	log.Println(<-ch)
+	log.Println("Exiting eventbot")
+
+	// Close server
+	server.Close()
 }

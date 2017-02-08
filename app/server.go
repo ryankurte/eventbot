@@ -1,5 +1,6 @@
 package app
 
+
 import (
 	"github.com/ryankurte/eventbot/analysis"
 	"github.com/ryankurte/eventbot/clients"
@@ -43,3 +44,8 @@ func (ebs *EventBotServer) Start() {
 	// Could have a shitty web view here also
 
 }
+
+func (ebs *EventBotServer) Close() {
+    ebs.em.Close()
+}
+
