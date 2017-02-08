@@ -100,7 +100,8 @@ func (em *EventManager) handleMessages(c chan interface{}) {
 }
 
 // Handle a single message
-func (em *EventManager) handleMessage(i interface{}) {
+func (em *EventManager) handleMessage(i interface{}) error {
+    var err error = nil
 
 	m := i.(Message)
 
@@ -110,7 +111,7 @@ func (em *EventManager) handleMessage(i interface{}) {
 	res, err := em.wc.HandleMessage(m.Text())
 	if err != nil {
 		log.Printf("Error processing message")
-		return
+		return err
 	}
 
 	// TODO: act on message
@@ -125,12 +126,14 @@ func (em *EventManager) handleMessage(i interface{}) {
 		c, ok := em.clients[m.Connector()]
 		if !ok {
 			log.Printf("Invalid connector %s for response", m.Connector())
-			return
+			return err
 		}
 
 		// Send reply
 		c.Send(reply)
 	}
+
+    return err
 }
 
 // Create an event
