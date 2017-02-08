@@ -91,7 +91,7 @@ func TestEventManager(t *testing.T) {
 		}
 
 		// Send message via channel
-		ch <- m
+		ch <- &m
 
 	})
 }

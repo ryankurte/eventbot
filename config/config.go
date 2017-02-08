@@ -54,6 +54,20 @@ func GetConfig() *EventBotConfig {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+/*
+	// This doesn't work for testing (I guess there could be a test twitter account..?)
+	if c.TwitterApiKey == "" || c.TwitterApiSecret == "" {
+		log.Fatal("Invalid twitter API credentials")
+	}
+
+	if c.TwitterAccessToken == "" || c.TwitterTokenSecret == "" {
+		log.Fatal("Invalid twitter access token")
+	}
+*/
+	
+	if c.WatsonUser == "" || c.WatsonPass == "" || c.WatsonWs == "" {
+		log.Fatal("Invalid watson credentials")
+	}
 
 	return c
 }
